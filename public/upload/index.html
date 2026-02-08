@@ -1,0 +1,107 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Invitados</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        .card { border: 1px solid #ddd; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        #status { font-weight: bold; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+    </style>
+  </head>
+<body>
+
+    <div class="card">
+        <h2>Subir Listado de Invitados (CSV)</h2>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="csvFile">Selecciona archivo .csv:</label>
+                <input type="file" id="csvFile" name="file" accept=".csv" required>
+              </div>
+            <button type="submit">Importar Invitados</button>
+        </form>
+        <div id="status"></div>
+    </div>
+
+    <div class="card">
+        <h2>Buscar Invitado</h2>
+        <div class="form-group" style="display: flex; gap: 10px;">
+            <input type="text" id="searchInput" placeholder="Escribe un nombre...">
+              <button onclick="searchGuests()">Buscar</button>
+        </div>
+        <table id="guestsTable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Respuesta</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        // --- 1. HANDLE CSV UPLOAD ---
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('status');
+            const fileInput = document.getElementById('csvFile');
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            statusDiv.innerText = "Subiendo...";
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.style.color = "green";
+                    statusDiv.innerText = `Éxito: ${result.added} nuevos, ${result.skipped} duplicados omitidos.`;
+                    fileInput.value = ''; // Reset form
+                } else {
+                    statusDiv.style.color = "red";
+                    statusDiv.innerText = "Error: " + result.error;
+                }
+            } catch (err) {
+                statusDiv.innerText = "Error de conexión con el servidor.";
+            }
+        });
+
+        // --- 2. HANDLE SEARCH ---
+        async function searchGuests() {
+            const query = document.getElementById('searchInput').value;
+            const tbody = document.querySelector('#guestsTable tbody');
+            
+            try {
+                const res = await fetch(`/api/search?nombre=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                
+                tbody.innerHTML = data.map(guest => `
+                    <tr>
+                        <td>${guest.nombre}</td>
+                        <td>${guest.apellido}</td>
+                        <td>${guest.phone}</td>
+                        <td><strong>${guest.respuesta || 'Sin respuesta'}</strong></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Error buscando:", err);
+            }
+        }
+    </script>
+  </body>
+</html>
