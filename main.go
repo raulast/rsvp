@@ -13,12 +13,14 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// Model with Unique Phone constraint
+// index combined of code-event-phone unique
 type Invitado struct {
 	gorm.Model
 	Nombre    string `json:"nombre"`
 	Apellido  string `json:"apellido"`
-	Phone     string `json:"phone" gorm:"uniqueIndex"`
+	Code      string `json:"code" gorm:"uniqueIndex:code-event-phone"`
+	Evento    string `json:"evento" gorm:"uniqueIndex:code-event-phone"`
+	Phone     string `json:"phone" gorm:"uniqueIndex:code-event-phone"`
 	Respuesta string `json:"respuesta"`
 }
 
@@ -34,7 +36,7 @@ func main() {
 
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
-		dbName = "invitados.db"
+		dbName = "eventos.db"
 	}
 
 	// 2. Initialize Database
@@ -54,23 +56,20 @@ func main() {
 	// API Routes
 	api := r.Group("/api")
 	{
-		api.GET("/search", searchInvitado)
+		api.GET("/search/:evento", searchInvitado)
 		api.PATCH("/invitados/:id", updateRespuesta)
 		api.POST("/upload", uploadCSV)
 	}
 
-		// 2. Serve the main HTML file at the root "/"
+	// 2. Serve the main HTML file at the root "/"
 	// StaticFile is specific and does not use a wildcard, so it won't panic
 	r.StaticFile("/", "./public/index.html")
-
-	// 3. Serve other folders specifically if they exist (e.g., css, js, images)
-	// This maps http://localhost:8080/css/style.css to ./public/css/style.css
 	r.Static("/css", "./public/css")
 	r.Static("/js", "./public/js")
 
 	// 4. OPTIONAL: Catch-all for other files in public
-	// If you have files directly in /public (like favicon.ico), 
-    // use NoRoute to serve them without a wildcard conflict.
+	// If you have files directly in /public (like favicon.ico),
+	// use NoRoute to serve them without a wildcard conflict.
 	r.NoRoute(func(c *gin.Context) {
 		path := c.Request.URL.Path
 		// Check if the requested file exists in the public folder
@@ -79,9 +78,8 @@ func main() {
 			return
 		}
 		// If nothing matches, send them back to index (Standard for Single Page Apps)
-		c.File("./public/index.html")
+		c.File("./public/rsvp/index.html")
 	})
-
 
 	log.Printf("🚀 Server starting on http://localhost:%s", port)
 
@@ -93,9 +91,11 @@ func main() {
 // --- HANDLERS ---
 
 func searchInvitado(c *gin.Context) {
-	nombre := c.Query("nombre")
+	search := c.Query("search")
+	evento := c.Param("evento")
 	var invitados []Invitado
-	db.Where("nombre LIKE ?", "%"+nombre+"%").Find(&invitados)
+
+	db.Where("evento = ? AND ((nombre || ' ' || apellido)  LIKE ? OR code = ?)", evento, "%"+search+"%", search).Find(&invitados)
 	c.JSON(http.StatusOK, invitados)
 }
 
@@ -143,9 +143,11 @@ func uploadCSV(c *gin.Context) {
 			break
 		}
 
+		// nombre, apellido, code, evento, phone, respuesta
 		invitado := Invitado{
 			Nombre: record[0], Apellido: record[1],
-			Phone: record[2], Respuesta: record[3],
+			Code: record[2], Evento: record[3],
+			Phone: record[4], Respuesta: record[5],
 		}
 
 		// Insert or ignore if Phone exists

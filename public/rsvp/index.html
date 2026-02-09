@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/128/1059/1059852.png" type="image/png">
+    <title>Raul y Cate</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"
+        integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <main>
+        <!-- search-invitation -->
+        <div class="search-container section">
+            <div class="search-container__content">
+                <h1 class="search-container__title">Busca tu invitación</h1>
+                <input type="text" class="search-container__input"
+                    placeholder="Ingresa tu nombre o codigo de invitación">
+                <button class="search-container__button">Buscar</button>
+            </div>
+        </div>
+        <!-- select-invitation -->
+        <div class="select-container section">
+            <div class="back-button">
+                <button class="back-to-search">Regresar</button>
+            </div>
+            <div class="select-container__content">
+                <h1 class="select-container__title">Selecciona tu invitación</h1>
+                <div class="select-container__select">
+                    <!-- checkboxes -->
+                </div>
+                <button class="select-container__button">Seleccionar</button>
+            </div>
+        </div>
+        <!-- confirm-invitation -->
+        <div class="confirm-container section">
+            <div class="back-button">
+                <button class="back-to-select">Regresar</button>
+            </div>
+            <div class="confirm-container__content">
+                <h1 class="confirm-container__title">Confirmar asistencia de:</h1>
+                <div class="confirm-container__invitations">
+                    <!-- selected invitations -->
+                </div>
+                <div class="confirm-container__select">
+                    <!-- buttons -->
+                    <button class="confirm-container__button confirm-container__button--yes">Si, asistira</button>
+                    <button class="confirm-container__button confirm-container__button--no">No, no asistira</button>
+                </div>
+            </div>
+        </div>
+        <!-- thanks -->
+        <div class="thanks-container section">
+            <div class="thanks-container__content">
+                <h1 class="thanks-container__title">¡Gracias por tu respuesta!</h1>
+                <p class="thanks-container__text">Esperamos verte en nuestra celebración</p>
+            </div>
+        </div>
+    </main>
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
