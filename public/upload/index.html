@@ -96,7 +96,7 @@
         <div class="form-group">
             <input type="text" id="evento" name="evento" placeholder="codigo del evento">
             <button onclick="searchGuests()">Buscar</button>
-            <a href="#" id="exportLink">exportar</a>
+            <a href="#" id="exportLink" target="_blank">exportar</a>
         </div>
         <div class="form-group" style="display: flex; gap: 10px;">
             <input type="text" id="searchInput" placeholder="Escribe un nombre...">
@@ -119,7 +119,7 @@
         $(document).ready(function () {
             $('#evento').on('change', function () {
                 const evento = $(this).val();
-                $('#exportLink').attr('href', `/export/${evento}`);
+                $('#exportLink').attr('href', `/api/export/${evento}`);
             });
         });
         // --- 1. HANDLE CSV UPLOAD ---
