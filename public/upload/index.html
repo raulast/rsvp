@@ -116,6 +116,12 @@
     </div>
 
     <script>
+        $(document).ready(function () {
+            $('#evento').on('change', function () {
+                const evento = $(this).val();
+                $('#exportLink').attr('href', `/export/${evento}`);
+            });
+        });
         // --- 1. HANDLE CSV UPLOAD ---
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -139,7 +145,6 @@
                     statusDiv.innerText = `Éxito: ${result.added} nuevos, ${result.skipped} duplicados omitidos.`;
                     fileInput.value = ''; // Reset form
                     const evento = `${document.getElementById('evento').value}`.trim() || "default";
-                    document.getElementById('exportLink').href = `/export/${evento}`;
                 } else {
                     statusDiv.style.color = "red";
                     statusDiv.innerText = "Error: " + result.error;
