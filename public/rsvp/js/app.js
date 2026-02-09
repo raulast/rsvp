@@ -13,8 +13,7 @@ selectContainer.hide();
 confirmContainer.hide();
 thanksContainer.hide();
 var path = window.location.pathname;
-var evento = path.split("/")[2];
-console.log(evento);
+var evento = path.split("/")[2] || "default";
 
 
 function searchInvitation() {

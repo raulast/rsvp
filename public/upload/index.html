@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Invitados</title>
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"
+        integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=" crossorigin="anonymous"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -89,7 +91,13 @@
     </div>
 
     <div class="card">
+        <!-- evento-->
         <h2>Buscar Invitado</h2>
+        <div class="form-group">
+            <input type="text" id="evento" name="evento" placeholder="codigo del evento">
+            <button onclick="searchGuests()">Buscar</button>
+            <a href="#" id="exportLink">exportar</a>
+        </div>
         <div class="form-group" style="display: flex; gap: 10px;">
             <input type="text" id="searchInput" placeholder="Escribe un nombre...">
             <button onclick="searchGuests()">Buscar</button>
@@ -130,6 +138,8 @@
                     statusDiv.style.color = "green";
                     statusDiv.innerText = `Éxito: ${result.added} nuevos, ${result.skipped} duplicados omitidos.`;
                     fileInput.value = ''; // Reset form
+                    const evento = `${document.getElementById('evento').value}`.trim() || "default";
+                    document.getElementById('exportLink').href = `/export/${evento}`;
                 } else {
                     statusDiv.style.color = "red";
                     statusDiv.innerText = "Error: " + result.error;
@@ -143,9 +153,10 @@
         async function searchGuests() {
             const query = document.getElementById('searchInput').value;
             const tbody = document.querySelector('#guestsTable tbody');
+            const evento = `${document.getElementById('evento').value}`.trim() || "default";
 
             try {
-                const res = await fetch(`/api/search?search=${encodeURIComponent(query)}`);
+                const res = await fetch(`/api/search/${evento}?search=${encodeURIComponent(query)}`);
                 const data = await res.json();
 
                 tbody.innerHTML = data.map(guest => `

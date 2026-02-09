@@ -1,1 +1,56 @@
-<h1>public</h1>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main>
+        <h1>
+            RSVP
+        </h1>
+        <p>It's a system to manage invitations</p>
+
+        <h3>to create an event:</h3>
+        <ol>
+            <li>go to <a href="/upload">Upload</a></li>
+            <li>upload a csv file with the following columns:</li>
+            <ul>
+                <li><b>nombre:</b> name </li>
+                <li><b>apellido:</b> last name </li>
+                <li><b>code:</b> code is an arbitrary string to identify a invitation or group of invitations example:
+                    "family_Doe" or "lksdgj123" </li>
+                <li><b>phone:</b> phone is unique for each invitation and code combination</li>
+                <li><b>evento:</b> event is a identifier of the event alow filter by event on path /rsvp/:event if it is
+                    empty create a default value "default"</li>
+                <li><b>respuesta:</b> response (optional) if it is empty create a default value "sin respuesta"</li>
+            </ul>
+        </ol>
+        <h3>to confirm attendance:</h3>
+        <ol>
+            <li>go to <a href="/rsvp">RSVP event: default</a> oryour custom event RSVP: <a
+                    href="/rsvp/event_code">/rsvp/event_code</a></li>
+            <li>search for your invitation code or name</li>
+            <li>select an invitation or invitations (if you're going with more than one person with the same code)</li>
+            <li>confirm attendance</li>
+            <li>enjoy the event</li>
+        </ol>
+
+        <h3>to check an event:</h3>
+        <ol>
+            <li>go to <a href="/upload">/upload</a> there you can check progress of any event</li>
+        </ol>
+
+        <h3>to export the csv file:</h3>
+        <ol>
+            <li>go to <a href="/export">/export</a> for download "default" event</li>
+            <li>go to <a href="/export/event_code">/export/event_code</a> for download "event_code" event</li>
+        </ol>
+    </main>
+</body>
+
+</html>

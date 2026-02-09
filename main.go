@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/csv"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
@@ -59,6 +61,8 @@ func main() {
 		api.GET("/search/:evento", searchInvitado)
 		api.PATCH("/invitados/:id", updateRespuesta)
 		api.POST("/upload", uploadCSV)
+		//export csv
+		api.GET("/export/:evento", exportCSV)
 	}
 
 	// 2. Serve the main HTML file at the root "/"
@@ -88,12 +92,21 @@ func main() {
 	}
 }
 
+// --- helpers ---
+func ifEmpty(s string, a string) string {
+	if s == "" {
+		return a
+	}
+	return s
+}
+
 // --- HANDLERS ---
 
 func searchInvitado(c *gin.Context) {
 	search := c.Query("search")
 	evento := c.Param("evento")
 	var invitados []Invitado
+	log.Printf("🔍 Searching for: %s in event: %s", search, evento)
 
 	db.Where("evento = ? AND ((nombre || ' ' || apellido)  LIKE ? OR code = ?)", evento, "%"+search+"%", search).Find(&invitados)
 	c.JSON(http.StatusOK, invitados)
@@ -144,10 +157,14 @@ func uploadCSV(c *gin.Context) {
 		}
 
 		// nombre, apellido, code, evento, phone, respuesta
+		// trim spaces from all fields
+		for i := range record {
+			record[i] = strings.TrimSpace(record[i])
+		}
 		invitado := Invitado{
 			Nombre: record[0], Apellido: record[1],
-			Code: record[2], Evento: record[3],
-			Phone: record[4], Respuesta: record[5],
+			Code: record[2], Evento: ifEmpty(record[3], "default"),
+			Phone: record[4], Respuesta: ifEmpty(record[5], "Sin respuesta"),
 		}
 
 		// Insert or ignore if Phone exists
@@ -165,4 +182,30 @@ func uploadCSV(c *gin.Context) {
 		"added":   added,
 		"skipped": skipped,
 	})
+}
+
+func exportCSV(c *gin.Context) {
+	evento := ifEmpty(c.Param("evento"), "default")
+	var invitados []Invitado
+	db.Where("evento = ?", evento).Find(&invitados)
+
+	// Create CSV
+	w := new(bytes.Buffer)
+	writer := csv.NewWriter(w)
+
+	// Write Header
+	writer.Write([]string{"Nombre", "Apellido", "Code", "Evento", "Phone", "Respuesta"})
+
+	// Write Data
+	for _, invitado := range invitados {
+		writer.Write([]string{invitado.Nombre, invitado.Apellido, invitado.Code, invitado.Evento, invitado.Phone, invitado.Respuesta})
+	}
+	writer.Flush()
+
+	// Set Headers
+	c.Header("Content-Type", "text/csv")
+	c.Header("Content-Disposition", "attachment; filename=\""+evento+".csv\"")
+
+	// Return CSV
+	c.String(http.StatusOK, w.String())
 }
